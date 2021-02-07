@@ -1,21 +1,19 @@
 
 " Color Schemes {{{
-autocmd vimenter * ++nested colorscheme gruvbox
-"autocmd vimenter * ++nested colorscheme onehalfdark
-"autocmd vimenter * ++nested colorscheme solarized
-"autocmd vimenter * ++nested colorscheme molokai
-"autocmd vimenter * ++nested colorscheme atom-dark
-"autocmd vimenter * ++nested colorscheme ayu
-"autocmd vimenter * ++nested colorscheme OceanicNext
-"autocmd vimenter * ++nested colorscheme nord
-"autocmd vimenter * ++nested colorscheme palenight
+augroup color_scheme
+    autocmd!
+    "autocmd vimenter * ++nested colorscheme gruvbox
+    "autocmd vimenter * ++nested colorscheme onehalfdark
+    "autocmd vimenter * ++nested colorscheme solarized
+    "autocmd vimenter * ++nested colorscheme molokai
+    "autocmd vimenter * ++nested colorscheme atom-dark
+    "autocmd vimenter * ++nested colorscheme ayu
+    autocmd vimenter * ++nested colorscheme OceanicNext
+    "autocmd vimenter * ++nested colorscheme nord
+    "autocmd vimenter * ++nested colorscheme palenight
+augroup END
 " }}}
 
-if $TERM =~ 'xterm-256color'
-  set noek
-endif
-
-syntax enable
 "set background=dark
 "let g:molokai_original=1
 
@@ -41,17 +39,14 @@ Plug 'ayu-theme/ayu-vim'
 
 Plug 'Yggdroot/indentLine'
 Plug 'maxbrunsfeld/vim-yankstack'
+Plug 'mhinz/vim-startify'
 Plug 'junegunn/goyo.vim'
 Plug 'ryanoasis/vim-devicons'
-Plug 'junegunn/limelight.vim'
 Plug 'Raimondi/delimitMate'
-Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'tpope/vim-surround'
-Plug 'dense-analysis/ale'
 Plug 'sheerun/vim-polyglot'
 Plug 'mileszs/ack.vim'
 Plug 'Konfekt/FastFold'
-Plug 'vim-vdebug/vdebug'
 
 call plug#end()
 
@@ -59,6 +54,8 @@ call plug#end()
 
 execute pathogen#infect()
 " }}}
+
+
 
 " Ayu Theme {{{
 "let ayucolor="light"
@@ -72,19 +69,23 @@ set history=500
 
 set encoding=UTF-8
 
+if $TERM =~ 'xterm-256color'
+  set noek
+endif
+
+
 " sets true colors in terminal
 if exists('+termguicolors')
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
   set termguicolors
 endif
-
 "set foldlevelstart=99
 
 " sets the cursor to thin instead of block in terminal
 if $TERM_PROGRAM =~ "iTerm"
-    let &t_SI = "\<Esc>]50;CursorShape=1\x7" 
-    let &t_EI = "\<Esc>]50;CursorShape=0\x7" 
+    let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+    let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
 
 " Enable filetype plugins
@@ -104,7 +105,7 @@ nmap <leader>w :w!<cr>
 " Set line numbers on/off
 set nu
 
-" :W sudo saves the file 
+" :W sudo saves the file
 " (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
@@ -113,8 +114,8 @@ command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 " Moving around, tabs, windows and buffers {{{
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
-map <space> /
-map <C-space> ?
+nnoremap <space> /
+nnoremap <C-space> ?
 nnoremap <esc> :noh<return><esc>
 let delimitMate_jump_expansion = 1
 let delimitMate_expand_cr = 2
@@ -137,34 +138,14 @@ let g:goyo_margin_bottom = 2
 nnoremap <silent> <leader>z :Goyo<cr>
 " }}}
 
-" Ale (syntax checker and linter) {{{
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:ale_linters = {
-\   'javascript': ['jshint'],
-\   'python': ['pylint'],
-\   'go': ['go', 'golint', 'errcheck']
-\}
-
-nmap <silent> <leader>a <Plug>(ale_next_wrap)
-
-" Disabling highlighting
-let g:ale_set_highlights = 0
-
-" Only run linting when saving the file
-let g:ale_lint_on_enter = 0
-
-" }}}
 
 " VIM user interface {{{
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Set 7 lines to the cursor - when moving vertically using j/k
 set so=7
 
 " Avoid garbled characters in Chinese language windows OS
-let $LANG='en' 
+let $LANG='en'
 set langmenu=en
-source $VIMRUNTIME/delmenu.vim
-source $VIMRUNTIME/menu.vim
 
 " Turn on the Wild menu
 set wildmenu
@@ -195,23 +176,24 @@ set whichwrap+=<,>,h,l
 " Ignore case when searching
 set ignorecase
 
-" When searching try to be smart about cases 
+" When searching try to be smart about cases
 set smartcase
 
 " Highlight search results
 set hlsearch
 
 " Makes search act like search in modern browsers
-set incsearch 
+set incsearch
 
 " Don't redraw while executing macros (good performance config)
-set lazyredraw 
+set lazyredraw
 
 " For regular expressions turn magic on
 set magic
 
 " Show matching brackets when text indicator is over them
-set showmatch 
+set showmatch
+
 " How many tenths of a second to blink when matching brackets
 set mat=2
 
@@ -222,7 +204,11 @@ set t_vb=
 set tm=500
 
 " Properly disable sound on errors on MacVim
-autocmd GUIEnter * set vb t_vb=
+
+augroup gui_settings
+    autocmd!
+    autocmd GUIEnter * set vb t_vb=
+augroup END
 
 
 " Add a bit extra margin to the left
@@ -239,7 +225,7 @@ set noswapfile
 " }}}
 
 " Yankstack {{{
-let g: yankstack_map_keys = 0
+let g:yankstack_map_keys = 0
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 " }}}
@@ -265,52 +251,59 @@ set wrap "Wrap lines
 
 
 " Useful mappings for managing tabs
-map <leader>tn :tabnew<cr>
-map <leader>to :tabonly<cr>
-map <leader>tc :tabclose<cr>
-map <leader>tm :tabmove 
-map <leader>t<leader> :tabnext 
+nnoremap <leader>tn :tabnew<cr>
+nnoremap <leader>to :tabonly<cr>
+nnoremap <leader>tc :tabclose<cr>
+nnoremap <leader>tm :tabmove
+nnoremap <leader>t<leader> :tabnext
 
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
-nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
-au TabLeave * let g:lasttab = tabpagenr()
+nnoremap <leader>tl :exe "tabn ".g:lasttab<CR>
 
 
 " Return to last edit position when opening files (You want this!)
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+augroup last_pos
+    autocmd!
+    au TabLeave * let g:lasttab = tabpagenr()
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+augroup END
 
 
 
 " Remap VIM 0 to first non-blank character
-map 0 ^
+nnoremap 0 ^
 
 " Move a line of text using ALT+[jk] or Command+[jk] on mac
-nmap <D-j> mz:m+<cr>`z
-nmap <D-k> mz:m-2<cr>`z
-vmap <D-j> :m'>+<cr>`<my`>mzgv`yo`z
-vmap <D-k> :m'<-2<cr>`>my`<mzgv`yo`z
+nnoremap <D-j> mz:m+<cr>`z
+nnoremap <D-k> mz:m-2<cr>`z
+vnoremap <D-j> :m'>+<cr>`<my`>mzgv`yo`z
+vnoremap <D-k> :m'<-2<cr>`>my`<mzgv`yo`z
 
 " Delete trailing white space on save, useful for some filetypes ;)
-fun! CleanExtraSpaces()
-    let save_cursor = getpos(".")
-    let old_query = getreg('/')
-    silent! %s/\s\+$//e
-    call setpos('.', save_cursor)
-    call setreg('/', old_query)
-endfun
 
-if has("autocmd")
-    autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee :call CleanExtraSpaces()
-endif
+"fun! CleanExtraSpaces()
+    "let save_cursor = getpos(".")
+    "let old_query = getreg('/')
+    "silent! %s/\s\+$//e
+    "call setpos('.', save_cursor)
+    "call setreg('/', old_query)
+"endfun
+
+"augroup clean_spaces
+    "if has("autocmd")
+        "autocmd!
+        "autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee :call CleanExtraSpaces()
+    "endif
+"augroup END
 
 " }}}
 
 " Python {{{
 
 " string mappings
-inoremap <leader>s ''<ESC>i
-inoremap <leader>S ""<ESC>i
+inoremap <leader>s ''<esc>i
+inoremap <leader>S ""<esc>i
 
 
 augroup filetype_python
@@ -318,6 +311,7 @@ augroup filetype_python
     au FileType python map <buffer> <leader>1 /class<cr>
     au FileType python map <buffer> <leader>2 /def<cr>
     au FileType python setlocal foldlevel=99
+    au FileType python nnoremap <leader>c :call TogglePythonComment()<cr>
 augroup END
 " }}}
 
@@ -338,6 +332,11 @@ highlight link javaDocTags PreProc
 let vim_markdown_folding_disabled = 1
 " }}}
 
+" Polyglot (syntax highlighting) {{{
+
+let g:cpp_member_highlight = 1
+
+" }}}
 
 " Parenthesis and brackets {{{
 
@@ -350,15 +349,18 @@ vnoremap 4 <esc>`>a'<esc>`<i'<esc>
 vnoremap 5 <esc>`>a"<esc>`<i"<esc>
 
 
-" insert brackets after function e.g. int main()
+" insert brackets
 " cmd-[ for open bracket in new line
 " cmd-] for open backet in same line
-inoremap <D-[> <ESC>$o{<cr>}<ESC>O
-inoremap <D-]> <ESC>$a {<cr>}<ESC>O
- 
+inoremap <D-[> <esc>$o{<cr>}<esc>O
+inoremap <D-]> <esc>$a {<cr>}<esc>O
+
 " add semicolon to end of line and go to next
-map <leader>m $a;<ESC>o
-imap <leader>m <ESC>$a;<ESC>o
+nnoremap <leader>m $a;<esc>o
+inoremap <leader>m <esc>$a;<esc>o
+nnoremap <leader>M ma$a;<esc>`a
+inoremap <leader>M <esc>ma$a;<esc>`a
+
 
 " }}}
 
@@ -383,11 +385,18 @@ let g:indentLine_showFirstIndentLevel = 1
 let g:indentLine_defaultGroup = 'Comment'
 " }}}
 
-" Learn Vimscript the hard way {{{
+" Maps {{{
 
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
-nnoremap zz :wq<cr>
+
+" Close buffer and write
+" if readonly then just close
+nnoremap zz :call CloseAndOrWrite()<cr>
+
+vnoremap <D-c> "*y
+nnoremap <D-v> "*p
+inoremap <D-v> "*p
 
 " abbreviations
 iabbrev waht what
@@ -397,12 +406,16 @@ iabbrev oen one
 iabbrev @@ nathanthomas707@gmail.com
 iabbrev ccopy Copyright 2021 Nathan Thomas, all rights reserved
 
+iabbrev stativ static
+
 nmap H 0
+omap H 0
 nnoremap L $
 onoremap L $
 
-inoremap jk <esc>
-inoremap kj <esc>
+" Makes typing kinda annoying so its disabled
+"inoremap jk <esc>
+"inoremap kj <esc>
 
 
 " inside parens
@@ -413,17 +426,41 @@ onoremap b /return<cr>
 onoremap in( :<c-u>normal! f(vi(<cr>
 " inside last paren
 onoremap il( :<c-u>normal! F)vi(<cr>
-
+" replace header and go to insert mode
 onoremap ih :<c-u>execute "normal! ?^==\\+$\r:nohlsearch\rkvg_"<cr>
 
-nnoremap <leader>M :execute "normal! mqA;\<esc>`q"
 
-nnoremap <leader>g :exe "grep -R " . shellescape(expand("<cWORD>")) . " ."<cr>
 
-nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr>:copen<cr>
-nnoremap <leader>N :setlocal number!<cr>
+nnoremap <leader>N :setlocal number!<cr>;
 nnoremap <leader>f :call FoldColumnToggle()<cr>
 nnoremap <leader>q :call QuickfixToggle()<cr>
+
+
+" }}}
+
+" Vimscript file settings {{{
+augroup filetype_vim
+    autocmd!
+    autocmd FileType vim setlocal foldmethod=marker
+    autocmd FileType vim setlocal foldlevel=0
+augroup END
+" }}}
+
+" Helper functions {{{
+
+function! TogglePythonComment()
+    let has_hash = 0
+    for char in str2list(getline('.'))
+        if char == 35
+            let has_hash = 1
+        endif
+    endfor
+    if has_hash
+        execute "normal! ma^x`a"
+    else
+        execute "normal! ma^i#\<Esc>`a"
+    endif
+endfunction
 
 function! FoldColumnToggle()
     if &foldcolumn
@@ -443,24 +480,22 @@ function! QuickfixToggle()
         let g:quickfix_is_open = 1
     endif
 endfunction
-
-" }}}
-
-" Vimscript file settings {{{
-augroup filetype_vim
-    autocmd!
-    autocmd FileType vim setlocal foldmethod=marker
-    autocmd FileType vim setlocal foldlevelstart=0
-augroup END
-" }}}
-
-" Helper functions {{{
 " Returns true if paste mode is enabled
 function! HasPaste()
     if &paste
         return 'PASTE MODE  '
     endif
     return ''
+endfunction
+
+function! CloseAndOrWrite()
+    " if writable, write
+    " else just quit
+    if !&readonly && @% != ''
+        :wq
+    else
+        :q
+    endif
 endfunction
 
 " Don't close window, when deleting a buffer
@@ -486,7 +521,7 @@ endfunction
 
 function! CmdLine(str)
     call feedkeys(":" . a:str)
-endfunction 
+endfunction
 
 function! VisualSelection(direction, extra_filter) range
     let l:saved_reg = @"
@@ -509,5 +544,42 @@ endfunction
 
 " }}}
 
+" Ale (syntax checker and linter) {{{
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'python': ['yapf', 'remove_trailing_lines'],
+\   'javascript': ['eslint'],
+\}
+
+let g:ale_linters = {
+\   'python': ['flake8', 'pylint'],
+\}
+
+let g:ale_fix_on_save = 1
+
+" }}}
 
 
+" Jedi for Python {{{
+let g:jedi#auto_initialization = 0
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#environment_path = "/usr/local/bin/python3.9"
+let g:jedi#goto_command = "<leader>d"
+let g:jedi#goto_assignments_command = "<leader>g"
+"let g:jedi#goto_stubs_command = "<leader>s"
+let g:jedi#goto_definitions_command = "<leader>D"
+"let g:jedi#documentation_command = "K"
+let g:jedi#usages_command = "<leader>n"
+let g:jedi#completions_command = "<C-Space>"
+"let g:jedi#rename_command = "<leader>r"
+" }}}
+
+
+" FastFold {{{
+
+nmap zuz <Plug>(FastFoldUpdate)
+let g:fastfold_savehook = 1
+let g:fastfold_fold_command_suffixes = ['x','X','a','A','o','O','c','C']
+let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
+
+" }}}
