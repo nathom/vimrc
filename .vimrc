@@ -1,25 +1,31 @@
-
 " Color Schemes {{{
+let s:theme = 'OceanicNext'
+
+" Available Themes:
+" OceanicNext
+" gruvbox
+" molokai
+" atom-dark
+" palenight
+" ayu
+" nord
+" solarized
+" onehalfdark
 augroup color_scheme
     autocmd!
-    "autocmd vimenter * ++nested colorscheme gruvbox
-    "autocmd vimenter * ++nested colorscheme onehalfdark
-    "autocmd vimenter * ++nested colorscheme solarized
-    "autocmd vimenter * ++nested colorscheme molokai
-    "autocmd vimenter * ++nested colorscheme atom-dark
-    "autocmd vimenter * ++nested colorscheme ayu
-    autocmd vimenter * ++nested colorscheme OceanicNext
-    "autocmd vimenter * ++nested colorscheme nord
-    "autocmd vimenter * ++nested colorscheme palenight
+    execute 'autocmd vimenter * ++nested colorscheme ' . s:theme
 augroup END
 " }}}
 
-"set background=dark
-"let g:molokai_original=1
-
-
 " Plugins {{{
 call plug#begin()
+" Automatically install plug {{{
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+" }}}
 
 " Themes {{{2
 Plug 'morhetz/gruvbox'
@@ -35,7 +41,6 @@ Plug 'rakr/vim-one'
 Plug 'mhartington/oceanic-next'
 Plug 'ayu-theme/ayu-vim'
 " }}}
-"
 
 Plug 'Yggdroot/indentLine'
 Plug 'maxbrunsfeld/vim-yankstack'
@@ -50,12 +55,11 @@ Plug 'Konfekt/FastFold'
 
 call plug#end()
 
-" Pathogen
-
-execute pathogen#infect()
+" Pathogen {{{
+"execute pathogen#infect()
 " }}}
 
-
+" }}}
 
 " Ayu Theme {{{
 "let ayucolor="light"
@@ -80,7 +84,6 @@ if exists('+termguicolors')
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
   set termguicolors
 endif
-"set foldlevelstart=99
 
 " sets the cursor to thin instead of block in terminal
 if $TERM_PROGRAM =~ "iTerm"
@@ -94,7 +97,10 @@ filetype indent on
 
 " Set to auto read when a file is changed from the outside
 set autoread
-au FocusGained,BufEnter * checktime
+augroup auto_read
+    autocmd!
+    au FocusGained,BufEnter * checktime
+augroup END
 
 let mapleader = ","
 let maplocalleader = "\\"
@@ -109,37 +115,6 @@ set nu
 " (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
-" }}}
-
-" Moving around, tabs, windows and buffers {{{
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
-nnoremap <space> /
-nnoremap <C-space> ?
-nnoremap <esc> :noh<return><esc>
-let delimitMate_jump_expansion = 1
-let delimitMate_expand_cr = 2
-""""""""""""""""""""""""""""""
-" => Visual mode related
-""""""""""""""""""""""""""""""
-" Visual mode pressing * or # searches for the current selection
-" Super useful! From an idea by Michael Naumann
-vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
-vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
-vnoremap <silent> <leader>r :call VisualSelection('replace', '')<CR>
-
-" }}}
-
-" Goyo {{{
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:goyo_width=100
-let g:goyo_margin_top = 2
-let g:goyo_margin_bottom = 2
-nnoremap <silent> <leader>z :Goyo<cr>
-" }}}
-
-
-" VIM user interface {{{
 " Set 7 lines to the cursor - when moving vertically using j/k
 set so=7
 
@@ -151,6 +126,7 @@ set langmenu=en
 set wildmenu
 
 " remove status bar and other stuff
+" for a minimal look
 set noshowmode
 set laststatus=0
 set noshowcmd
@@ -214,23 +190,12 @@ augroup END
 " Add a bit extra margin to the left
 set foldcolumn=1
 
-" }}}
 
-" Files, backups and undo {{{
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Turn backup off, since most stuff is in SVN, git etc. anyway...
 set nobackup
 set nowb
 set noswapfile
-" }}}
 
-" Yankstack {{{
-let g:yankstack_map_keys = 0
-nmap <leader>p <Plug>yankstack_substitute_older_paste
-nmap <leader>P <Plug>yankstack_substitute_newer_paste
-" }}}
-
-" Text, indents, and tabs {{{
 " Use spaces instead of tabs
 set expandtab
 
@@ -248,14 +213,47 @@ set tw=500
 set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
+" }}}
+
+" Moving around, tabs, windows and buffers {{{
+
+" Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
+nnoremap <space> /
+nnoremap <C-space> ?
+nnoremap <esc> :noh<return><esc>
+let delimitMate_jump_expansion = 1
+let delimitMate_expand_cr = 2
+
+" Visual mode pressing * or # searches for the current selection
+" Super useful! From an idea by Michael Naumann
+vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
+vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
+vnoremap <silent> <leader>r :call VisualSelection('replace', '')<CR>
+
+" }}}
+
+" Goyo {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:goyo_width=100
+let g:goyo_margin_top = 2
+let g:goyo_margin_bottom = 2
+nnoremap <silent> <leader>z :Goyo<cr>
+" }}}
+
+" Yankstack {{{
+let g:yankstack_map_keys = 0
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
+" }}}
+
+" Text, indents, and tabs {{{
 
 
 " Useful mappings for managing tabs
 nnoremap <leader>tn :tabnew<cr>
-nnoremap <leader>to :tabonly<cr>
-nnoremap <leader>tc :tabclose<cr>
-nnoremap <leader>tm :tabmove
 nnoremap <leader>t<leader> :tabnext
+nnoremap <leader>l gt
+nnoremap <leader>h gT
 
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
@@ -280,22 +278,14 @@ nnoremap <D-k> mz:m-2<cr>`z
 vnoremap <D-j> :m'>+<cr>`<my`>mzgv`yo`z
 vnoremap <D-k> :m'<-2<cr>`>my`<mzgv`yo`z
 
-" Delete trailing white space on save, useful for some filetypes ;)
 
-"fun! CleanExtraSpaces()
-    "let save_cursor = getpos(".")
-    "let old_query = getreg('/')
-    "silent! %s/\s\+$//e
-    "call setpos('.', save_cursor)
-    "call setreg('/', old_query)
-"endfun
-
-"augroup clean_spaces
-    "if has("autocmd")
-        "autocmd!
-        "autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee :call CleanExtraSpaces()
-    "endif
-"augroup END
+augroup clean_spaces
+    autocmd!
+    if has("autocmd")
+        autocmd!
+        autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee :call CleanExtraSpaces()
+    endif
+augroup END
 
 " }}}
 
@@ -312,6 +302,8 @@ augroup filetype_python
     au FileType python map <buffer> <leader>2 /def<cr>
     au FileType python setlocal foldlevel=99
     au FileType python nnoremap <leader>c :call TogglePythonComment()<cr>
+    "au FileType python xnoremap <leader>c os'''<cr>'''<esc>P
+    "au FileType python xnoremap <leader>c o:<c-u>call TogglePythonBlockComment()<cr>
 augroup END
 " }}}
 
@@ -325,8 +317,14 @@ highlight link javaScopeDecl Statement
 highlight link javaType Type
 highlight link javaDocTags PreProc
 
-" }}}
+augroup java_filetype
+    autocmd!
+    au FileType java setlocal foldmethod=syntax
+    au FileType java setlocal foldlevel=99
+    au FileType java nnoremap <leader>c :call ToggleCComment()<cr>
+augroup END
 
+" }}}
 
 " Markdown {{{
 let vim_markdown_folding_disabled = 1
@@ -364,7 +362,6 @@ inoremap <leader>M <esc>ma$a;<esc>`a
 
 " }}}
 
-
 " Nerd Tree {{{
 let g:NERDTreeWinPos = "right"
 let NERDTreeShowHidden=1
@@ -392,24 +389,15 @@ nnoremap <leader>sv :source $MYVIMRC<cr>
 
 " Close buffer and write
 " if readonly then just close
-nnoremap zz :call CloseAndOrWrite()<cr>
+nnoremap <silent> zz :call CloseAndOrWrite()<cr>
 
 vnoremap <D-c> "*y
 nnoremap <D-v> "*p
 inoremap <D-v> "*p
 
-" abbreviations
-iabbrev waht what
-iabbrev tehn then
-iabbrev adn and
-iabbrev oen one
-iabbrev @@ nathanthomas707@gmail.com
-iabbrev ccopy Copyright 2021 Nathan Thomas, all rights reserved
 
-iabbrev stativ static
-
-nmap H 0
-omap H 0
+nnoremap H ^
+onoremap H ^
 nnoremap L $
 onoremap L $
 
@@ -438,6 +426,16 @@ nnoremap <leader>q :call QuickfixToggle()<cr>
 
 " }}}
 
+" Abbreviations {{{
+iabbrev waht what
+iabbrev tehn then
+iabbrev adn and
+iabbrev oen one
+iabbrev @@ nathanthomas707@gmail.com
+
+iabbrev stativ static
+" }}}
+
 " Vimscript file settings {{{
 augroup filetype_vim
     autocmd!
@@ -448,19 +446,61 @@ augroup END
 
 " Helper functions {{{
 
+" Delete trailing white space on save, useful for some filetypes
+function! CleanExtraSpaces()
+    let save_cursor = getpos(".")
+    let old_query = getreg('/')
+    silent! %s/\s\+$//e
+    call setpos('.', save_cursor)
+    call setreg('/', old_query)
+endfunction
+
+" Commenting {{{
 function! TogglePythonComment()
-    let has_hash = 0
-    for char in str2list(getline('.'))
-        if char == 35
-            let has_hash = 1
-        endif
-    endfor
-    if has_hash
-        execute "normal! ma^x`a"
+    let l:line = getline('.')
+    let l:comment_pos = match(l:line, '#')
+    if l:comment_pos == -1
+        " insert # at the first non-space character of the line
+        execute "normal! ma^i#\<Space>\<Esc>`a"
     else
-        execute "normal! ma^i#\<Esc>`a"
+        " delete the first # and store
+        " character under cursor in register z
+        normal! ma^x"zyl
+        " if the character is a space, we need to delete that
+        if @z ==# ' '
+            normal! x
+        endif
+        " return to original position
+        normal `a
     endif
 endfunction
+
+function! TogglePythonBlockComment()
+    let l:indent_level = indent('.')
+    echom l:indent_level
+    "execute "normal! " . l:indent_level . "i\<Space>\<Esc>a'''\<Esc>\"cyy\"cpP"
+endfunction
+
+
+function! ToggleCComment()
+    let l:line = getline('.')
+    let l:comment_pos = match(l:line, '//')
+    if l:comment_pos == -1
+        " insert two slashes at the first non-space character of the line
+        execute "normal! ma^i//\<Space>\<Esc>`a"
+    else
+        " delete the first two slashes and store
+        " character under cursor in register z
+        normal! ma^xx"zyl
+        " if the character is a space, we need to delete that
+        if @z ==# ' '
+            normal! x
+        endif
+        " return to original position
+        normal `a
+    endif
+endfunction
+" }}}
 
 function! FoldColumnToggle()
     if &foldcolumn
@@ -491,7 +531,7 @@ endfunction
 function! CloseAndOrWrite()
     " if writable, write
     " else just quit
-    if !&readonly && @% != ''
+    if !&readonly && @% != '' && &buftype != 'nofile'
         :wq
     else
         :q
@@ -559,22 +599,6 @@ let g:ale_fix_on_save = 1
 
 " }}}
 
-
-" Jedi for Python {{{
-let g:jedi#auto_initialization = 0
-let g:jedi#auto_vim_configuration = 0
-let g:jedi#environment_path = "/usr/local/bin/python3.9"
-let g:jedi#goto_command = "<leader>d"
-let g:jedi#goto_assignments_command = "<leader>g"
-"let g:jedi#goto_stubs_command = "<leader>s"
-let g:jedi#goto_definitions_command = "<leader>D"
-"let g:jedi#documentation_command = "K"
-let g:jedi#usages_command = "<leader>n"
-let g:jedi#completions_command = "<C-Space>"
-"let g:jedi#rename_command = "<leader>r"
-" }}}
-
-
 " FastFold {{{
 
 nmap zuz <Plug>(FastFoldUpdate)
@@ -582,4 +606,13 @@ let g:fastfold_savehook = 1
 let g:fastfold_fold_command_suffixes = ['x','X','a','A','o','O','c','C']
 let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
 
+" }}}
+
+" C {{{
+augroup filetype_c
+    autocmd!
+    au FileType c setlocal foldmethod=syntax
+    au FileType c setlocal foldlevel=99
+    au FileType c nnoremap <leader>c :call ToggleCComment()<cr>
+augroup END
 " }}}
