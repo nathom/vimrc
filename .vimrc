@@ -42,16 +42,19 @@ Plug 'mhartington/oceanic-next'
 Plug 'ayu-theme/ayu-vim'
 " }}}
 
+Plug 'dense-analysis/ale'
 Plug 'Yggdroot/indentLine'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'mhinz/vim-startify'
 Plug 'junegunn/goyo.vim'
+Plug 'tpope/vim-fugitive'
 Plug 'ryanoasis/vim-devicons'
 Plug 'Raimondi/delimitMate'
 Plug 'tpope/vim-surround'
 Plug 'sheerun/vim-polyglot'
 Plug 'mileszs/ack.vim'
 Plug 'Konfekt/FastFold'
+Plug 'tpope/vim-fugitive'
 
 call plug#end()
 
@@ -71,6 +74,7 @@ let ayucolor="dark"
 " Sets how many lines of history VIM has to remember
 set history=500
 
+"syntax on
 set encoding=UTF-8
 
 if $TERM =~ 'xterm-256color'
@@ -223,6 +227,8 @@ nnoremap <C-space> ?
 nnoremap <esc> :noh<return><esc>
 let delimitMate_jump_expansion = 1
 let delimitMate_expand_cr = 2
+nnoremap J 10j
+nnoremap K 10k
 
 " Visual mode pressing * or # searches for the current selection
 " Super useful! From an idea by Michael Naumann
@@ -303,7 +309,8 @@ augroup filetype_python
     au FileType python setlocal foldlevel=99
     au FileType python nnoremap <leader>c :call TogglePythonComment()<cr>
     "au FileType python xnoremap <leader>c os'''<cr>'''<esc>P
-    "au FileType python xnoremap <leader>c o:<c-u>call TogglePythonBlockComment()<cr>
+    au FileType python xnoremap <leader>c v:<c-u>call TogglePythonBlockComment()<cr>
+    au FileType python vnoremap <leader>c :<c-u>call TogglePythonBlockComment()<cr>
 augroup END
 " }}}
 
@@ -365,7 +372,7 @@ inoremap <leader>M <esc>ma$a;<esc>`a
 " Nerd Tree {{{
 let g:NERDTreeWinPos = "right"
 let NERDTreeShowHidden=1
-let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$']
+let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$', '\.o$']
 let g:NERDTreeWinSize=35
 map <leader>nn :NERDTreeToggle<cr>
 map <leader>nb :NERDTreeFromBookmark<Space>
@@ -444,6 +451,43 @@ augroup filetype_vim
 augroup END
 " }}}
 
+" Ale (syntax checker and linter) {{{
+"let g:ale_fixers = {
+""\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+""\   'python': ['yapf', 'remove_trailing_lines'],
+""\   'javascript': ['eslint'],
+""\}
+
+"let g:ale_linters = {
+""\   'python': ['flake8', 'pylint'],
+""\}
+
+"let g:ale_fix_on_save = 1
+
+" }}}
+
+" FastFold {{{
+
+nmap zuz <Plug>(FastFoldUpdate)
+let g:fastfold_savehook = 1
+let g:fastfold_fold_command_suffixes = ['x','X','a','A','o','O','c','C']
+let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
+
+" }}}
+
+" C {{{
+iabbrev typdef typedef
+let g:c_autodoc = 1
+augroup filetype_c
+    autocmd!
+    au FileType c set foldmethod=syntax
+    au FileType c setlocal foldlevel=99
+    au FileType c nnoremap <leader>c :call ToggleCComment()<cr>
+    au FileType c vnoremap <leader>c :<C-u>call ToggleCBlockComment()<cr>
+    au FileType c xnoremap <leader>c v:<C-u>call ToggleCBlockComment()<cr>
+augroup END
+" }}}
+
 " Helper functions {{{
 
 " Delete trailing white space on save, useful for some filetypes
@@ -476,9 +520,13 @@ function! TogglePythonComment()
 endfunction
 
 function! TogglePythonBlockComment()
-    let l:indent_level = indent('.')
-    echom l:indent_level
-    "execute "normal! " . l:indent_level . "i\<Space>\<Esc>a'''\<Esc>\"cyy\"cpP"
+    " line numbers of the start and end 
+    " of the visual selection
+    let l:start = line("'<")
+    let l:end = line("'>") + 1
+    " go to start line, insert triple-string above
+    " go to end line, insert triple-string below
+    execute 'normal! ' . l:start . "GO'''\<Esc>" . l:end . "Go'''\<Esc>"
 endfunction
 
 
@@ -500,6 +548,17 @@ function! ToggleCComment()
         normal `a
     endif
 endfunction
+
+function! ToggleCBlockComment()
+    " line numbers of the start and end 
+    " of the visual selection
+    let l:start = line("'<")
+    let l:end = line("'>") + 1
+    " go to start line, insert triple-string above
+    " go to end line, insert triple-string below
+    execute 'normal! ' . l:start . "GO/*\<Esc>" . l:end . "Go*/\<Esc>"
+endfunction
+
 " }}}
 
 function! FoldColumnToggle()
@@ -582,37 +641,4 @@ endfunction
 
 
 
-" }}}
-
-" Ale (syntax checker and linter) {{{
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['yapf', 'remove_trailing_lines'],
-\   'javascript': ['eslint'],
-\}
-
-let g:ale_linters = {
-\   'python': ['flake8', 'pylint'],
-\}
-
-let g:ale_fix_on_save = 1
-
-" }}}
-
-" FastFold {{{
-
-nmap zuz <Plug>(FastFoldUpdate)
-let g:fastfold_savehook = 1
-let g:fastfold_fold_command_suffixes = ['x','X','a','A','o','O','c','C']
-let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
-
-" }}}
-
-" C {{{
-augroup filetype_c
-    autocmd!
-    au FileType c setlocal foldmethod=syntax
-    au FileType c setlocal foldlevel=99
-    au FileType c nnoremap <leader>c :call ToggleCComment()<cr>
-augroup END
 " }}}
