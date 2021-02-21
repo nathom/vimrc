@@ -1,5 +1,5 @@
 " Color Schemes {{{
-let s:theme = 'OceanicNext'
+let s:theme = 'gruvbox'
 
 " Available Themes:
 " OceanicNext
@@ -335,6 +335,10 @@ augroup END
 
 " Markdown {{{
 let vim_markdown_folding_disabled = 1
+augroup markdown_filetype
+    autocmd!
+    au FileType markdown inoremap <localleader>y ``<esc>i
+augroup END
 " }}}
 
 " Polyglot (syntax highlighting) {{{
@@ -372,7 +376,7 @@ inoremap <leader>M <esc>ma$a;<esc>`a
 " Nerd Tree {{{
 let g:NERDTreeWinPos = "right"
 let NERDTreeShowHidden=1
-let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$', '\.o$']
+let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$', '\.o$', '\.DS_Store$']
 let g:NERDTreeWinSize=35
 map <leader>nn :NERDTreeToggle<cr>
 map <leader>nb :NERDTreeFromBookmark<Space>
@@ -436,8 +440,11 @@ nnoremap <leader>q :call QuickfixToggle()<cr>
 " Abbreviations {{{
 iabbrev waht what
 iabbrev tehn then
+iabbrev pubicl public
+iabbrev pubcli public
 iabbrev adn and
 iabbrev oen one
+iabbrev teh the
 iabbrev @@ nathanthomas707@gmail.com
 
 iabbrev stativ static
@@ -452,17 +459,11 @@ augroup END
 " }}}
 
 " Ale (syntax checker and linter) {{{
-"let g:ale_fixers = {
-""\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-""\   'python': ['yapf', 'remove_trailing_lines'],
-""\   'javascript': ['eslint'],
-""\}
-
-"let g:ale_linters = {
-""\   'python': ['flake8', 'pylint'],
-""\}
-
-"let g:ale_fix_on_save = 1
+let g:ale_python_flake8_executable = '/usr/local/bin/flake8'
+let g:ale_python_autopep8_executable = '/usr/local/bin/autopep8'
+let g:ale_python_mypy_executable = '/usr/local/bin/mypy'
+let g:ale_python_pycodestyle_executable = '/usr/local/bin/pycodestyle'
+let g:ale_fix_on_save = 1
 
 " }}}
 
