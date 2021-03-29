@@ -17,53 +17,6 @@ augroup color_scheme
 augroup END
 " }}}
 
-" Plugins {{{
-call plug#begin()
-" Automatically install plug {{{
-if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-" }}}
-
-" Themes {{{2
-Plug 'morhetz/gruvbox'
-Plug 'sonph/onehalf', { 'rtp': 'vim' }
-Plug 'altercation/vim-colors-solarized'
-Plug 'gosukiwi/vim-atom-dark'
-Plug 'drewtempelmeyer/palenight.vim'
-Plug 'tomasr/molokai'
-Plug 'Lokaltog/vim-distinguished'
-Plug 'arcticicestudio/nord-vim'
-Plug 'sjl/badwolf'
-Plug 'rakr/vim-one'
-Plug 'mhartington/oceanic-next'
-Plug 'ayu-theme/ayu-vim'
-" }}}
-
-Plug 'dense-analysis/ale'
-Plug 'Yggdroot/indentLine'
-Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'mhinz/vim-startify'
-Plug 'junegunn/goyo.vim'
-Plug 'tpope/vim-fugitive'
-Plug 'ryanoasis/vim-devicons'
-Plug 'Raimondi/delimitMate'
-Plug 'tpope/vim-surround'
-Plug 'sheerun/vim-polyglot'
-Plug 'mileszs/ack.vim'
-Plug 'Konfekt/FastFold'
-Plug 'tpope/vim-fugitive'
-
-call plug#end()
-
-" Pathogen {{{
-"execute pathogen#infect()
-" }}}
-
-" }}}
-
 " Ayu Theme {{{
 "let ayucolor="light"
 "let ayucolor="mirage"
@@ -217,6 +170,7 @@ set tw=500
 set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
+
 " }}}
 
 " Moving around, tabs, windows and buffers {{{
@@ -235,6 +189,10 @@ nnoremap K 10k
 vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
 vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 vnoremap <silent> <leader>r :call VisualSelection('replace', '')<CR>
+
+" Splitting
+set splitbelow
+set splitright
 
 " }}}
 
@@ -258,12 +216,12 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 " Useful mappings for managing tabs
 nnoremap <leader>tn :tabnew<cr>
 nnoremap <leader>t<leader> :tabnext
-nnoremap <leader>l gt
-nnoremap <leader>h gT
+nnoremap <D-i> gT
+nnoremap <D-o> gt
 
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
-nnoremap <leader>tl :exe "tabn ".g:lasttab<CR>
+nnoremap <D-u> :exe "tabn ".g:lasttab<CR>
 
 
 " Return to last edit position when opening files (You want this!)
@@ -300,7 +258,7 @@ augroup END
 " string mappings
 inoremap <leader>s ''<esc>i
 inoremap <leader>S ""<esc>i
-
+"let g:disable_native_indent = 1
 
 augroup filetype_python
     autocmd!
@@ -308,10 +266,20 @@ augroup filetype_python
     au FileType python map <buffer> <leader>2 /def<cr>
     au FileType python setlocal foldlevel=99
     au FileType python nnoremap <leader>c :call TogglePythonComment()<cr>
-    "au FileType python xnoremap <leader>c os'''<cr>'''<esc>P
     au FileType python xnoremap <leader>c v:<c-u>call TogglePythonBlockComment()<cr>
     au FileType python vnoremap <leader>c :<c-u>call TogglePythonBlockComment()<cr>
+    " complete function def
+    au FileType python inoremap <D-[> <ESC>$a:<ESC>o
+    " f-strings
+    au FileType python inoremap <leader>f f""<ESC>i
+    " python docstring/comments
+    " au FileType python nmap <leader>dd o"""<cr><esc>kA
+    au FileType python nnoremap <leader>dd :Pydocstring<cr>
 augroup END
+
+setlocal foldlevelstart=99
+
+
 " }}}
 
 " Java {{{
@@ -334,17 +302,24 @@ augroup END
 " }}}
 
 " Markdown {{{
+set conceallevel=0
 let vim_markdown_folding_disabled = 1
 augroup markdown_filetype
     autocmd!
-    au FileType markdown inoremap <localleader>y ``<esc>i
+    au FileType markdown inoremap <leader>y ``<esc>i
+    au FileType markdown inoremap <leader>Y ```<cr>```<esc>O
 augroup END
 " }}}
 
 " Polyglot (syntax highlighting) {{{
-
+let g:python_highlight_indent_errors = 0
+let g:python_highlight_space_errors = 0
 let g:cpp_member_highlight = 1
+let g:vim_markdown_conceal = 0
+let g:tex_conceal = ""
 
+" insanely slow
+let g:polyglot_disabled = ['autoindent', 'python-indent']
 " }}}
 
 " Parenthesis and brackets {{{
@@ -377,7 +352,9 @@ inoremap <leader>M <esc>ma$a;<esc>`a
 let g:NERDTreeWinPos = "right"
 let NERDTreeShowHidden=1
 let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$', '\.o$', '\.DS_Store$']
-let g:NERDTreeWinSize=35
+let g:NERDTreeWinSize=25
+let g:NERDTreeDirArrowExpandable = '❯'
+let g:NERDTreeDirArrowCollapsible = '~'
 map <leader>nn :NERDTreeToggle<cr>
 map <leader>nb :NERDTreeFromBookmark<Space>
 map <leader>nf :NERDTreeFind<cr>
@@ -386,10 +363,7 @@ map <leader>ncd :NERDTreeCWD<cr>
 " }}}
 
 " IndentLine {{{
-"let g:indentLine_char = ''
-"let g:indentLine_first_char = ''
 let g:indentLine_showFirstIndentLevel = 1
-"let g:indentLine_setColors = 0
 let g:indentLine_defaultGroup = 'Comment'
 " }}}
 
@@ -408,9 +382,11 @@ inoremap <D-v> "*p
 
 
 nnoremap H ^
-onoremap H ^
 nnoremap L $
+onoremap H ^
 onoremap L $
+vnoremap H ^
+vnoremap L $
 
 " Makes typing kinda annoying so its disabled
 "inoremap jk <esc>
@@ -459,12 +435,23 @@ augroup END
 " }}}
 
 " Ale (syntax checker and linter) {{{
+
+let g:ale_linters = {
+\   'python': ['flake8'],
+\}
+let g:ale_fixers = {
+\   'python': ['black', 'isort'],
+\}
+
+let g:ale_fix_on_save = 1
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_link_on_enter = 0
+let g:ale_set_highlights = 0
+
 let g:ale_python_flake8_executable = '/usr/local/bin/flake8'
 let g:ale_python_autopep8_executable = '/usr/local/bin/autopep8'
 let g:ale_python_mypy_executable = '/usr/local/bin/mypy'
 let g:ale_python_pycodestyle_executable = '/usr/local/bin/pycodestyle'
-let g:ale_fix_on_save = 1
-
 " }}}
 
 " FastFold {{{
@@ -479,6 +466,7 @@ let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
 " C {{{
 iabbrev typdef typedef
 let g:c_autodoc = 1
+
 augroup filetype_c
     autocmd!
     au FileType c set foldmethod=syntax
@@ -500,67 +488,6 @@ function! CleanExtraSpaces()
     call setreg('/', old_query)
 endfunction
 
-" Commenting {{{
-function! TogglePythonComment()
-    let l:line = getline('.')
-    let l:comment_pos = match(l:line, '#')
-    if l:comment_pos == -1
-        " insert # at the first non-space character of the line
-        execute "normal! ma^i#\<Space>\<Esc>`a"
-    else
-        " delete the first # and store
-        " character under cursor in register z
-        normal! ma^x"zyl
-        " if the character is a space, we need to delete that
-        if @z ==# ' '
-            normal! x
-        endif
-        " return to original position
-        normal `a
-    endif
-endfunction
-
-function! TogglePythonBlockComment()
-    " line numbers of the start and end 
-    " of the visual selection
-    let l:start = line("'<")
-    let l:end = line("'>") + 1
-    " go to start line, insert triple-string above
-    " go to end line, insert triple-string below
-    execute 'normal! ' . l:start . "GO'''\<Esc>" . l:end . "Go'''\<Esc>"
-endfunction
-
-
-function! ToggleCComment()
-    let l:line = getline('.')
-    let l:comment_pos = match(l:line, '//')
-    if l:comment_pos == -1
-        " insert two slashes at the first non-space character of the line
-        execute "normal! ma^i//\<Space>\<Esc>`a"
-    else
-        " delete the first two slashes and store
-        " character under cursor in register z
-        normal! ma^xx"zyl
-        " if the character is a space, we need to delete that
-        if @z ==# ' '
-            normal! x
-        endif
-        " return to original position
-        normal `a
-    endif
-endfunction
-
-function! ToggleCBlockComment()
-    " line numbers of the start and end 
-    " of the visual selection
-    let l:start = line("'<")
-    let l:end = line("'>") + 1
-    " go to start line, insert triple-string above
-    " go to end line, insert triple-string below
-    execute 'normal! ' . l:start . "GO/*\<Esc>" . l:end . "Go*/\<Esc>"
-endfunction
-
-" }}}
 
 function! FoldColumnToggle()
     if &foldcolumn
@@ -580,6 +507,7 @@ function! QuickfixToggle()
         let g:quickfix_is_open = 1
     endif
 endfunction
+
 " Returns true if paste mode is enabled
 function! HasPaste()
     if &paste
@@ -588,9 +516,8 @@ function! HasPaste()
     return ''
 endfunction
 
+" universal close file command, writes if possible
 function! CloseAndOrWrite()
-    " if writable, write
-    " else just quit
     if !&readonly && @% != '' && &buftype != 'nofile'
         :wq
     else
@@ -642,4 +569,119 @@ endfunction
 
 
 
+" }}}
+
+" Commenting Functions {{{
+function! TogglePythonComment()
+    let l:line = getline('.')
+    let l:comment_pos = match(l:line, '#')
+    if l:comment_pos == -1
+        " insert # at the first non-space character of the line
+        execute "normal! ma^i#\<Space>\<Esc>`a"
+    else
+        " delete the first # and store
+        " character under cursor in register z
+        normal! ma^x"zyl
+        " if the character is a space, we need to delete that
+        if @z ==# ' '
+            normal! x
+        endif
+        " return to original position
+        normal `a
+    endif
+endfunction
+
+
+function! TogglePythonBlockComment()
+    " line numbers of the start and end
+    " of the visual selection
+    let l:start = line("'<")
+    let l:end = line("'>") + 1
+    " go to start line, insert triple-string above
+    " go to end line, insert triple-string below
+    execute 'normal! ' . l:start . 'GO"""' . "\<Esc>" . l:end . 'GO"""' . "\<Esc>"
+endfunction
+
+
+function! ToggleCComment()
+    let l:line = getline('.')
+    let l:comment_pos = match(l:line, '//')
+    if l:comment_pos == -1
+        " insert two slashes at the first non-space character of the line
+        execute "normal! ma^i//\<Space>\<Esc>`a"
+    else
+        " delete the first two slashes and store
+        " character under cursor in register z
+        normal! ma^xx"zyl
+        " if the character is a space, we need to delete that
+        if @z ==# ' '
+            normal! x
+        endif
+        " return to original position
+        normal `a
+    endif
+endfunction
+
+function! ToggleCBlockComment()
+    " line numbers of the start and end
+    " of the visual selection
+    let l:start = line("'<")
+    let l:end = line("'>") + 1
+    " go to start line, insert triple-string above
+    " go to end line, insert triple-string below
+    execute 'normal! ' . l:start . "GO/*\<Esc>" . l:end . "Go*/\<Esc>"
+endfunction
+
+" }}}
+
+" Plugins {{{
+call plug#begin()
+" Automatically install plug {{{
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+" }}}
+
+" Themes {{{2
+Plug 'morhetz/gruvbox'
+Plug 'sonph/onehalf', { 'rtp': 'vim' }
+Plug 'altercation/vim-colors-solarized'
+Plug 'gosukiwi/vim-atom-dark'
+Plug 'drewtempelmeyer/palenight.vim'
+Plug 'tomasr/molokai'
+Plug 'Lokaltog/vim-distinguished'
+Plug 'arcticicestudio/nord-vim'
+Plug 'sjl/badwolf'
+Plug 'rakr/vim-one'
+Plug 'mhartington/oceanic-next'
+Plug 'ayu-theme/ayu-vim'
+" }}}
+
+" Syntax
+Plug 'dense-analysis/ale'
+Plug 'sheerun/vim-polyglot'
+"Plug 'hattya/python-indent.vim', { 'for': 'python' }
+
+" Nerdtree related
+Plug 'preservim/nerdtree'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'ryanoasis/vim-devicons'
+
+" Utility
+Plug 'Raimondi/delimitMate'
+Plug 'maxbrunsfeld/vim-yankstack'
+Plug 'tpope/vim-surround'
+Plug 'heavenshell/vim-pydocstring', { 'do': 'make install' }
+
+" aesthetics
+Plug 'junegunn/goyo.vim'
+Plug 'mhinz/vim-startify'
+Plug 'Yggdroot/indentLine'
+
+"Plug 'tpope/vim-fugitive'
+"Plug 'mileszs/ack.vim'
+
+call plug#end()
 " }}}
