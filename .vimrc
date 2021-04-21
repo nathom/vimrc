@@ -1,5 +1,57 @@
+" Plugins {{{
+call plug#begin()
+
+" Themes {{{2
+Plug 'morhetz/gruvbox'
+Plug 'lifepillar/vim-gruvbox8'
+Plug 'ayu-theme/ayu-vim'
+Plug 'mhartington/oceanic-next'
+Plug 'sonph/onehalf', { 'rtp': 'vim' }
+Plug 'altercation/vim-colors-solarized'
+" }}}
+
+" Syntax
+Plug 'dense-analysis/ale'
+
+" insanely slow
+" has to defined before call
+let g:polyglot_disabled = ['autoindent', 'python-indent']
+
+Plug 'sheerun/vim-polyglot'
+
+" Nerdtree related
+Plug 'preservim/nerdtree'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'ryanoasis/vim-devicons'
+
+" Utility
+Plug 'Raimondi/delimitMate'
+Plug 'maxbrunsfeld/vim-yankstack'
+Plug 'tpope/vim-surround'
+
+" Git/github
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rhubarb'
+
+Plug 'tpope/vim-commentary'
+Plug 'heavenshell/vim-pydocstring', { 'do': 'make install' }
+Plug 'yhat/vim-docstring'
+
+" aesthetics
+Plug 'junegunn/goyo.vim'
+Plug 'mhinz/vim-startify'
+Plug 'Yggdroot/indentLine'
+
+Plug 'Galicarnax/vim-regex-syntax'
+
+" my plugins
+Plug 'nathom/fast-python-indent'
+
+call plug#end()
+" }}}
+
 " Color Schemes {{{
-let s:theme = 'gruvbox'
+let s:theme = 'ayu'
 
 " Available Themes:
 " OceanicNext
@@ -11,6 +63,7 @@ let s:theme = 'gruvbox'
 " nord
 " solarized
 " onehalfdark
+" jellybeans
 augroup color_scheme
     autocmd!
     execute 'autocmd vimenter * ++nested colorscheme ' . s:theme
@@ -168,7 +221,6 @@ set lbr
 set tw=500
 
 set ai "Auto indent
-set si "Smart indent
 set wrap "Wrap lines
 
 " }}}
@@ -213,6 +265,10 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 " Text, indents, and tabs {{{
 
 
+" nmap <leader>c gcc
+" xmap <leader>c gc
+" vmap <leader>c gc
+
 " Useful mappings for managing tabs
 nnoremap <leader>tn :tabnew<cr>
 nnoremap <leader>t<leader> :tabnext
@@ -222,7 +278,6 @@ nnoremap <D-o> gt
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
 nnoremap <D-u> :exe "tabn ".g:lasttab<CR>
-
 
 " Return to last edit position when opening files (You want this!)
 augroup last_pos
@@ -251,6 +306,9 @@ augroup clean_spaces
     endif
 augroup END
 
+nnoremap / zazj
+nnoremap ? zazk
+
 " }}}
 
 " Python {{{
@@ -265,9 +323,6 @@ augroup filetype_python
     au FileType python map <buffer> <leader>1 /class<cr>
     au FileType python map <buffer> <leader>2 /def<cr>
     au FileType python setlocal foldlevel=99
-    au FileType python nnoremap <leader>c :call TogglePythonComment()<cr>
-    au FileType python xnoremap <leader>c v:<c-u>call TogglePythonBlockComment()<cr>
-    au FileType python vnoremap <leader>c :<c-u>call TogglePythonBlockComment()<cr>
     " complete function def
     au FileType python inoremap <D-[> <ESC>$a:<ESC>o
     " f-strings
@@ -275,6 +330,8 @@ augroup filetype_python
     " python docstring/comments
     " au FileType python nmap <leader>dd o"""<cr><esc>kA
     au FileType python nnoremap <leader>dd :Pydocstring<cr>
+    au FileType python setlocal foldmethod=indent
+    au FileType python setlocal foldnestmax=2
 augroup END
 
 setlocal foldlevelstart=99
@@ -308,6 +365,7 @@ augroup markdown_filetype
     autocmd!
     au FileType markdown inoremap <leader>y ``<esc>i
     au FileType markdown inoremap <leader>Y ```<cr>```<esc>O
+    au FileType markdown let g:indentLine_loaded = 1
 augroup END
 " }}}
 
@@ -317,9 +375,6 @@ let g:python_highlight_space_errors = 0
 let g:cpp_member_highlight = 1
 let g:vim_markdown_conceal = 0
 let g:tex_conceal = ""
-
-" insanely slow
-let g:polyglot_disabled = ['autoindent', 'python-indent']
 " }}}
 
 " Parenthesis and brackets {{{
@@ -471,9 +526,6 @@ augroup filetype_c
     autocmd!
     au FileType c set foldmethod=syntax
     au FileType c setlocal foldlevel=99
-    au FileType c nnoremap <leader>c :call ToggleCComment()<cr>
-    au FileType c vnoremap <leader>c :<C-u>call ToggleCBlockComment()<cr>
-    au FileType c xnoremap <leader>c v:<C-u>call ToggleCBlockComment()<cr>
 augroup END
 " }}}
 
@@ -640,49 +692,4 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
-" }}}
-
-" Plugins {{{
-call plug#begin()
-
-" Themes {{{2
-Plug 'morhetz/gruvbox'
-Plug 'sonph/onehalf', { 'rtp': 'vim' }
-Plug 'altercation/vim-colors-solarized'
-Plug 'gosukiwi/vim-atom-dark'
-Plug 'drewtempelmeyer/palenight.vim'
-Plug 'tomasr/molokai'
-Plug 'Lokaltog/vim-distinguished'
-Plug 'arcticicestudio/nord-vim'
-Plug 'sjl/badwolf'
-Plug 'rakr/vim-one'
-Plug 'mhartington/oceanic-next'
-Plug 'ayu-theme/ayu-vim'
-" }}}
-
-" Syntax
-Plug 'dense-analysis/ale'
-Plug 'sheerun/vim-polyglot'
-"Plug 'hattya/python-indent.vim', { 'for': 'python' }
-
-" Nerdtree related
-Plug 'preservim/nerdtree'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plug 'ryanoasis/vim-devicons'
-
-" Utility
-Plug 'Raimondi/delimitMate'
-Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'tpope/vim-surround'
-Plug 'heavenshell/vim-pydocstring', { 'do': 'make install' }
-
-" aesthetics
-Plug 'junegunn/goyo.vim'
-Plug 'mhinz/vim-startify'
-Plug 'Yggdroot/indentLine'
-
-"Plug 'tpope/vim-fugitive'
-"Plug 'mileszs/ack.vim'
-
-call plug#end()
 " }}}
