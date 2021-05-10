@@ -8,6 +8,8 @@ Plug 'ayu-theme/ayu-vim'
 Plug 'mhartington/oceanic-next'
 Plug 'sonph/onehalf', { 'rtp': 'vim' }
 Plug 'altercation/vim-colors-solarized'
+Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'wojciechkepka/vim-github-dark'
 " }}}
 
 " Syntax
@@ -20,12 +22,22 @@ let g:polyglot_disabled = ['autoindent', 'python-indent']
 Plug 'sheerun/vim-polyglot'
 
 " Nerdtree related
-Plug 'preservim/nerdtree'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plug 'ryanoasis/vim-devicons'
+"Plug 'preservim/nerdtree'
+"Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+"Plug 'ryanoasis/vim-devicons'
+Plug 'tpope/vim-vinegar'
+Plug 'ctrlpvim/ctrlp.vim'
 
 " Utility
 Plug 'Raimondi/delimitMate'
+Plug 'Konfekt/FastFold'
+Plug 'vim-scripts/taglist.vim'
+Plug 'easymotion/vim-easymotion'
+Plug 'luochen1990/rainbow'
+Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'tpope/vim-surround'
 
@@ -38,20 +50,26 @@ Plug 'heavenshell/vim-pydocstring', { 'do': 'make install' }
 Plug 'yhat/vim-docstring'
 
 " aesthetics
-Plug 'junegunn/goyo.vim'
+Plug 'junegunn/goyo.vim', { 'for' : 'markdown' }
 Plug 'mhinz/vim-startify'
 Plug 'Yggdroot/indentLine'
 
 Plug 'Galicarnax/vim-regex-syntax'
 
+" bindings
+Plug 'tpope/vim-unimpaired'
+
 " my plugins
-Plug 'nathom/fast-python-indent'
+Plug 'nathom/fast-python-indent', { 'for': 'python' }
+
+" Undo tree
+Plug 'sjl/gundo.vim'
 
 call plug#end()
 " }}}
 
 " Color Schemes {{{
-let s:theme = 'ayu'
+let s:theme = 'gruvbox8'
 
 " Available Themes:
 " OceanicNext
@@ -76,6 +94,11 @@ augroup END
 let ayucolor="dark"
 " }}}
 
+" Airline {{{
+
+let g:airline#extensions#tabline#enabled = 1
+
+" }}}
 " General {{{
 " Sets how many lines of history VIM has to remember
 set history=500
@@ -135,11 +158,11 @@ set langmenu=en
 " Turn on the Wild menu
 set wildmenu
 
-" remove status bar and other stuff
-" for a minimal look
-set noshowmode
-set laststatus=0
-set noshowcmd
+" " remove status bar and other stuff
+" " for a minimal look
+" set noshowmode
+" set laststatus=0
+" set noshowcmd
 
 
 " Ignore compiled files
@@ -320,6 +343,8 @@ inoremap <leader>S ""<esc>i
 
 augroup filetype_python
     autocmd!
+    autocmd filetype python setlocal makeprg=pylint\ --reports=n\ --msg-template=\"{path}:{line}:\ {msg_id}\ {symbol},\ {obj}\ {msg}\"\ %:p
+    autocmd filetype python setlocal errorformat=%f:%l:\ %m
     au FileType python map <buffer> <leader>1 /class<cr>
     au FileType python map <buffer> <leader>2 /def<cr>
     au FileType python setlocal foldlevel=99
@@ -377,6 +402,23 @@ let g:vim_markdown_conceal = 0
 let g:tex_conceal = ""
 " }}}
 
+" File management {{{
+
+" So that undo's are saved
+set undofile
+if !isdirectory("/users/nathan/.vim/undodir")
+    call mkdir("/users/nathan/.vim/undodir")
+endif
+set undodir="/users/nathan/.vim/undodir"
+
+" }}}
+
+" Visual multi {{{
+nmap <C-j> <C-Down>
+nmap <C-k> <C-Up>
+let g:VM_show_warnings = 0
+" }}}
+
 " Parenthesis and brackets {{{
 
 
@@ -404,16 +446,21 @@ inoremap <leader>M <esc>ma$a;<esc>`a
 " }}}
 
 " Nerd Tree {{{
+let g:NERDTreeShowBookmarks = 1
 let g:NERDTreeWinPos = "right"
 let NERDTreeShowHidden=1
 let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$', '\.o$', '\.DS_Store$']
 let g:NERDTreeWinSize=25
 let g:NERDTreeDirArrowExpandable = '❯'
 let g:NERDTreeDirArrowCollapsible = '~'
-map <leader>nn :NERDTreeToggle<cr>
-map <leader>nb :NERDTreeFromBookmark<Space>
-map <leader>nf :NERDTreeFind<cr>
-map <leader>ncd :NERDTreeCWD<cr>
+" let g:NERDTreeHijackNetrw = 0
+" map <leader>nn :NERDTreeToggle<cr>
+" map <leader>nb :NERDTreeFromBookmark<Space>
+" map <leader>nf :NERDTreeFind<cr>
+" map <leader>ncd :NERDTreeCWD<cr>
+
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") &&
+     \ b:NERDTree.isTabTree()) | q | endif
 
 " }}}
 
@@ -448,19 +495,6 @@ vnoremap L $
 "inoremap kj <esc>
 
 
-" inside parens
-onoremap p i(
-" up to return statement
-onoremap b /return<cr>
-" inside next paren
-onoremap in( :<c-u>normal! f(vi(<cr>
-" inside last paren
-onoremap il( :<c-u>normal! F)vi(<cr>
-" replace header and go to insert mode
-onoremap ih :<c-u>execute "normal! ?^==\\+$\r:nohlsearch\rkvg_"<cr>
-
-
-
 nnoremap <leader>N :setlocal number!<cr>;
 nnoremap <leader>f :call FoldColumnToggle()<cr>
 nnoremap <leader>q :call QuickfixToggle()<cr>
@@ -491,22 +525,26 @@ augroup END
 
 " Ale (syntax checker and linter) {{{
 
+let g:ale_use_global_executables = 1
+
 let g:ale_linters = {
-\   'python': ['flake8'],
+\   'python': ['flake8', 'mypy'],
 \}
 let g:ale_fixers = {
-\   'python': ['black', 'isort'],
+\   'python': ['black'],
 \}
 
-let g:ale_fix_on_save = 1
 let g:ale_lint_on_text_changed = 'never'
-let g:ale_link_on_enter = 0
-let g:ale_set_highlights = 0
+let g:ale_set_highlights = 0  " annoying
 
-let g:ale_python_flake8_executable = '/usr/local/bin/flake8'
-let g:ale_python_autopep8_executable = '/usr/local/bin/autopep8'
-let g:ale_python_mypy_executable = '/usr/local/bin/mypy'
-let g:ale_python_pycodestyle_executable = '/usr/local/bin/pycodestyle'
+let g:ale_fix_on_save = 1
+" does not verify AST after fixing
+let g:ale_python_black_options = "--fast"
+
+" use quickfix list
+let g:ale_set_quickfix = 1
+let g:ale_set_loclist = 0
+
 " }}}
 
 " FastFold {{{
