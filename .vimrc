@@ -532,6 +532,7 @@ let g:ale_linters = {
 \}
 let g:ale_fixers = {
 \   'python': ['black'],
+\   'c': ['uncrustify'],
 \}
 
 let g:ale_lint_on_text_changed = 'never'
@@ -539,7 +540,7 @@ let g:ale_set_highlights = 0  " annoying
 
 let g:ale_fix_on_save = 1
 " does not verify AST after fixing
-let g:ale_python_black_options = "--fast"
+let g:ale_python_black_options = "--fast --line-length 79"
 
 " use quickfix list
 let g:ale_set_quickfix = 1
