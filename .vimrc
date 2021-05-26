@@ -2,59 +2,44 @@
 call plug#begin()
 
 " Themes {{{2
-Plug 'morhetz/gruvbox'
 Plug 'lifepillar/vim-gruvbox8'
 Plug 'ayu-theme/ayu-vim'
 Plug 'mhartington/oceanic-next'
-Plug 'sonph/onehalf', { 'rtp': 'vim' }
-Plug 'altercation/vim-colors-solarized'
-Plug 'dracula/vim', { 'as': 'dracula' }
-Plug 'wojciechkepka/vim-github-dark'
 " }}}
 
-" Syntax
+" Linting and fixing
 Plug 'dense-analysis/ale'
 
-" insanely slow
-" has to defined before call
-let g:polyglot_disabled = ['autoindent', 'python-indent']
-
+" Syntax highlighting
 Plug 'sheerun/vim-polyglot'
 
-" Nerdtree related
-"Plug 'preservim/nerdtree'
-"Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-"Plug 'ryanoasis/vim-devicons'
+" Filetree upgrade
 Plug 'tpope/vim-vinegar'
-Plug 'ctrlpvim/ctrlp.vim'
+
 
 " Utility
 Plug 'Raimondi/delimitMate'
-Plug 'Konfekt/FastFold'
-Plug 'vim-scripts/taglist.vim'
-Plug 'easymotion/vim-easymotion'
-Plug 'luochen1990/rainbow'
-Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
+" Save previous yanks
 Plug 'maxbrunsfeld/vim-yankstack'
+" Surround text in characters
 Plug 'tpope/vim-surround'
 
 " Git/github
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
 
+" Shell commands
+Plug 'tpope/vim-eunuch'
+
 Plug 'tpope/vim-commentary'
 Plug 'heavenshell/vim-pydocstring', { 'do': 'make install' }
-Plug 'yhat/vim-docstring'
 
 " aesthetics
-Plug 'junegunn/goyo.vim', { 'for' : 'markdown' }
-Plug 'mhinz/vim-startify'
 Plug 'Yggdroot/indentLine'
-
-Plug 'Galicarnax/vim-regex-syntax'
+Plug 'Galicarnax/vim-regex-syntax', {'for': 'python'}
 
 " bindings
 Plug 'tpope/vim-unimpaired'
@@ -62,8 +47,14 @@ Plug 'tpope/vim-unimpaired'
 " my plugins
 Plug 'nathom/fast-python-indent', { 'for': 'python' }
 
-" Undo tree
-Plug 'sjl/gundo.vim'
+" Fuzzy find
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+" Profile startup time
+Plug 'dstein64/vim-startuptime'
+
+Plug 'preservim/tagbar'
 
 call plug#end()
 " }}}
@@ -71,17 +62,6 @@ call plug#end()
 " Color Schemes {{{
 let s:theme = 'gruvbox8'
 
-" Available Themes:
-" OceanicNext
-" gruvbox
-" molokai
-" atom-dark
-" palenight
-" ayu
-" nord
-" solarized
-" onehalfdark
-" jellybeans
 augroup color_scheme
     autocmd!
     execute 'autocmd vimenter * ++nested colorscheme ' . s:theme
@@ -99,6 +79,7 @@ let ayucolor="dark"
 let g:airline#extensions#tabline#enabled = 1
 
 " }}}
+
 " General {{{
 " Sets how many lines of history VIM has to remember
 set history=500
@@ -106,12 +87,12 @@ set history=500
 "syntax on
 set encoding=UTF-8
 
-if $TERM =~ 'xterm-256color'
+if !has('nvim') && $TERM =~ 'xterm-256color'
   set noek
 endif
 
 
-" sets true colors in terminal
+"sets true colors in terminal
 if exists('+termguicolors')
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
@@ -269,6 +250,10 @@ vnoremap <silent> <leader>r :call VisualSelection('replace', '')<CR>
 set splitbelow
 set splitright
 
+" Toggle tagbar
+nnoremap <leader>tb :TagbarToggle<cr>
+let g:tagbar_width = 28
+
 " }}}
 
 " Goyo {{{
@@ -287,14 +272,8 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 
 " Text, indents, and tabs {{{
 
-
-" nmap <leader>c gcc
-" xmap <leader>c gc
-" vmap <leader>c gc
-
 " Useful mappings for managing tabs
 nnoremap <leader>tn :tabnew<cr>
-nnoremap <leader>t<leader> :tabnext
 nnoremap <D-i> gT
 nnoremap <D-o> gt
 
@@ -329,29 +308,22 @@ augroup clean_spaces
     endif
 augroup END
 
-nnoremap / zazj
-nnoremap ? zazk
-
 " }}}
 
 " Python {{{
 
 " string mappings
-inoremap <leader>s ''<esc>i
-inoremap <leader>S ""<esc>i
-"let g:disable_native_indent = 1
 
 augroup filetype_python
     autocmd!
-    autocmd filetype python setlocal makeprg=pylint\ --reports=n\ --msg-template=\"{path}:{line}:\ {msg_id}\ {symbol},\ {obj}\ {msg}\"\ %:p
-    autocmd filetype python setlocal errorformat=%f:%l:\ %m
     au FileType python map <buffer> <leader>1 /class<cr>
     au FileType python map <buffer> <leader>2 /def<cr>
     au FileType python setlocal foldlevel=99
     " complete function def
     au FileType python inoremap <D-[> <ESC>$a:<ESC>o
     " f-strings
-    au FileType python inoremap <leader>f f""<ESC>i
+    au FileType python inoremap <leader>m <ESC>$a,<cr>
+    au FileType python nnoremap <leader>m $a,<cr>
     " python docstring/comments
     " au FileType python nmap <leader>dd o"""<cr><esc>kA
     au FileType python nnoremap <leader>dd :Pydocstring<cr>
@@ -362,6 +334,73 @@ augroup END
 setlocal foldlevelstart=99
 
 
+" }}}
+
+" Rust {{{
+" Run rustfmt when saving buffer
+let g:rustfmt_autosave = 1
+
+augroup rust
+    autocmd FileType rust setlocal foldmethod=expr foldexpr=RustFold()
+augroup END
+
+
+function! MakeRustFuncDefs()
+    let b:RustFuncDefs = []
+
+    let lnum = 1
+    while lnum <= line('$')
+        let current_line = getline(lnum)
+        if match(current_line, '^ *\(pub \)\?fn') > -1
+            call AddRustFunc(lnum)
+        endif
+
+        let lnum += 1
+    endwhile
+endfunction
+
+function! AddRustFunc(lnum)
+    let save_pos = getpos('.')
+    call setpos('.', [0, a:lnum, 1, 0])
+
+    call search('{')
+    let start_lnum = line('.')
+
+    let end_lnum = searchpair('{', '', '}', 'n')
+    if end_lnum < 1
+        call setpos('.', save_pos)
+        return
+    endif
+
+    call add(b:RustFuncDefs, [start_lnum, end_lnum]);
+    call setpos('.', save_pos)
+endfunction
+
+function! RustFold()
+    if !exists("b:RustFuncDefs")
+        call MakeRustFuncDefs()
+    endif
+
+    for [start_lnum, end_lnum] in b:RustFuncDefs
+        if start_lnum > v:lnum
+            return 0
+        endif
+
+        if v:lnum == start_lnum + 1
+            return ">1"
+        elseif v:lnum == end_lnum
+            return "<1"
+        elseif v:lnum > start_lnum && v:lnum < end_lnum
+            return "="
+        endif
+    endfor
+endfunction
+
+
+" }}}
+
+" FZF {{{
+nnoremap <leader>f :Files<cr>
 " }}}
 
 " Java {{{
@@ -379,16 +418,20 @@ augroup java_filetype
     au FileType java setlocal foldmethod=syntax
     au FileType java setlocal foldlevel=99
     au FileType java nnoremap <leader>c :call ToggleCComment()<cr>
+    au FileType java nnoremap <leader>m $a;<esc>o
+    au FileType java inoremap <leader>m <esc>$a;<esc>o
+    au FileType java nnoremap <leader>M ma$a;<esc>`a
+    au FileType java inoremap <leader>M <esc>ma$a;<esc>`a
 augroup END
 
 " }}}
 
 " Markdown {{{
-set conceallevel=0
 let vim_markdown_folding_disabled = 1
 augroup markdown_filetype
     autocmd!
     au FileType markdown inoremap <leader>y ``<esc>i
+    au FileType mardown setlocal conceallevel=0
     au FileType markdown inoremap <leader>Y ```<cr>```<esc>O
     au FileType markdown let g:indentLine_loaded = 1
 augroup END
@@ -410,13 +453,9 @@ if !isdirectory("/users/nathan/.vim/undodir")
     call mkdir("/users/nathan/.vim/undodir")
 endif
 set undodir="/users/nathan/.vim/undodir"
+" Change dirs to the dir of the current file
+set autochdir
 
-" }}}
-
-" Visual multi {{{
-nmap <C-j> <C-Down>
-nmap <C-k> <C-Up>
-let g:VM_show_warnings = 0
 " }}}
 
 " Parenthesis and brackets {{{
@@ -442,25 +481,9 @@ inoremap <leader>m <esc>$a;<esc>o
 nnoremap <leader>M ma$a;<esc>`a
 inoremap <leader>M <esc>ma$a;<esc>`a
 
+" use dip, cip, etc to delete in parentheses
+onoremap ip i(
 
-" }}}
-
-" Nerd Tree {{{
-let g:NERDTreeShowBookmarks = 1
-let g:NERDTreeWinPos = "right"
-let NERDTreeShowHidden=1
-let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.class$', '\.jpg$', '\.gif$', '\.bluej$', '\.png$', '\.o$', '\.DS_Store$']
-let g:NERDTreeWinSize=25
-let g:NERDTreeDirArrowExpandable = '❯'
-let g:NERDTreeDirArrowCollapsible = '~'
-" let g:NERDTreeHijackNetrw = 0
-" map <leader>nn :NERDTreeToggle<cr>
-" map <leader>nb :NERDTreeFromBookmark<Space>
-" map <leader>nf :NERDTreeFind<cr>
-" map <leader>ncd :NERDTreeCWD<cr>
-
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") &&
-     \ b:NERDTree.isTabTree()) | q | endif
 
 " }}}
 
@@ -496,7 +519,6 @@ vnoremap L $
 
 
 nnoremap <leader>N :setlocal number!<cr>;
-nnoremap <leader>f :call FoldColumnToggle()<cr>
 nnoremap <leader>q :call QuickfixToggle()<cr>
 
 
@@ -507,9 +529,7 @@ iabbrev waht what
 iabbrev tehn then
 iabbrev pubicl public
 iabbrev pubcli public
-iabbrev adn and
 iabbrev oen one
-iabbrev teh the
 iabbrev @@ nathanthomas707@gmail.com
 
 iabbrev stativ static
@@ -528,7 +548,9 @@ augroup END
 let g:ale_use_global_executables = 1
 
 let g:ale_linters = {
+\   'zsh': [],
 \   'python': ['flake8', 'mypy'],
+\   'rust': ['cargo'],
 \}
 let g:ale_fixers = {
 \   'python': ['black'],
@@ -548,15 +570,6 @@ let g:ale_set_loclist = 0
 
 " }}}
 
-" FastFold {{{
-
-nmap zuz <Plug>(FastFoldUpdate)
-let g:fastfold_savehook = 1
-let g:fastfold_fold_command_suffixes = ['x','X','a','A','o','O','c','C']
-let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
-
-" }}}
-
 " C {{{
 iabbrev typdef typedef
 let g:c_autodoc = 1
@@ -565,6 +578,10 @@ augroup filetype_c
     autocmd!
     au FileType c set foldmethod=syntax
     au FileType c setlocal foldlevel=99
+    au FileType c nnoremap <leader>m $a;<esc>o
+    au FileType c inoremap <leader>m <esc>$a;<esc>o
+    au FileType c nnoremap <leader>M ma$a;<esc>`a
+    au FileType c inoremap <leader>M <esc>ma$a;<esc>`a
 augroup END
 " }}}
 

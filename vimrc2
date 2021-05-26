@@ -1,0 +1,154 @@
+call plug#begin()
+Plug 'morhetz/gruvbox'
+Plug 'dense-analysis/ale'
+Plug 'tpope/vim-vinegar'
+Plug 'tpope/vim-commentary'
+Plug 'Raimondi/delimitMate'
+
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+
+" bindings
+Plug 'tpope/vim-unimpaired'
+" Save previous yanks
+Plug 'maxbrunsfeld/vim-yankstack'
+" Surround text in characters
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-sensible'
+Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python'}
+Plug 'Galicarnax/vim-regex-syntax', { 'for': 'python' }
+Plug 'nathom/fast-python-indent', { 'for': 'python' }
+
+call plug#end()
+
+
+let mapleader = ","
+let maplocalleader = "\\"
+
+autocmd vimenter * ++nested colorscheme gruvbox
+
+
+let g:airline#extensions#tabline#enabled = 1
+
+" General {{{
+set encoding=UTF-8
+
+if !has('nvim') && $TERM =~ 'xterm-256color'
+  set noek
+endif
+
+nnoremap <leader>w :w!<cr>
+nnoremap ; :
+
+" sets true colors in terminal
+if exists('+termguicolors')
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
+" Line numbers
+set number
+
+" }}}
+
+" Quickly edit vimrc
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+
+	nnoremap H ^
+nnoremap L $
+onoremap H ^
+onoremap L $
+vnoremap H ^
+vnoremap L $
+
+
+
+iabbrev adn and
+iabbrev typdef typedef
+
+" ALE {{{
+let g:ale_use_global_executables = 1
+
+let g:ale_linters = {
+\   'zsh': [],
+\   'python': ['flake8', 'mypy'],
+\   'rust': ['cargo'],
+\}
+let g:ale_fixers = {
+\   'python': ['black'],
+\   'c': ['uncrustify'],
+\}
+
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_set_highlights = 0  " annoying
+
+let g:ale_fix_on_save = 1
+" does not verify AST after fixing
+let g:ale_python_black_options = "--fast --line-length 79"
+
+" use quickfix list
+let g:ale_set_quickfix = 1
+let g:ale_set_loclist = 0
+" }}}
+
+" Autocomplete semicolons
+nnoremap <leader>m $a;<esc>o
+inoremap <leader>m <esc>$a;<esc>o
+nnoremap <leader>M ma$a;<esc>`a
+inoremap <leader>M <esc>ma$a;<esc>`a
+
+
+" No annoying sound on errors
+set noerrorbells
+set novisualbell
+set t_vb=
+set tm=500
+
+" Use spaces instead of tabs
+set expandtab
+
+" Be smart when using tabs ;)
+set smarttab
+
+" 1 tab == 4 spaces
+set shiftwidth=4
+set tabstop=4
+
+nnoremap <space> /
+
+" Splitting
+set splitbelow
+set splitright
+
+let g:yankstack_map_keys = 0
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
+" Properly disable sound on errors on MacVim
+
+augroup gui_settings
+    autocmd!
+    autocmd GUIEnter * set vb t_vb=
+augroup END
+
+set autochdir
+
+
+" insert parens/brackets/quotes around visual mode selection
+vnoremap 1 <esc>`>a)<esc>`<i(<esc>
+vnoremap 2 <esc>`>a]<esc>`<i[<esc>
+vnoremap 3 <esc>`>a}<esc>`<i{<esc>
+vnoremap 4 <esc>`>a'<esc>`<i'<esc>
+vnoremap 5 <esc>`>a"<esc>`<i"<esc>
+
+
+
+" insert brackets
+" cmd-[ for open bracket in new line
+" cmd-] for open backet in same line
+inoremap <D-[> <esc>$o{<cr>}<esc>O
+inoremap <D-]> <esc>$a {<cr>}<esc>O
+
+
+" use dip, cip, etc to delete in parentheses
+onoremap ip i(
