@@ -1,34 +1,78 @@
+" Plugins {{{
 call plug#begin()
-Plug 'morhetz/gruvbox'
+
+Plug 'lifepillar/vim-gruvbox8'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'rktjmp/lush.nvim'
+" Plug 'npxbr/gruvbox.nvim'
+
 Plug 'dense-analysis/ale'
+
+" Syntax highlighting
+Plug 'cespare/vim-toml'
+Plug 'vim-python/python-syntax'
+Plug 'arzg/vim-rust-syntax-ext'
+
 Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'
 
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+Plug 'hoob3rt/lualine.nvim'
+Plug 'kyazdani42/nvim-web-devicons'
+
+Plug 'Konfekt/FastFold'
+'
+" Plug 'vim-airline/vim-airline'
+" Plug 'vim-airline/vim-airline-themes'
 
 " bindings
 Plug 'tpope/vim-unimpaired'
+" extend '.' functionality
+Plug 'tpope/vim-repeat'
 " Save previous yanks
 Plug 'maxbrunsfeld/vim-yankstack'
 " Surround text in characters
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-sensible'
+
 Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python'}
 Plug 'Galicarnax/vim-regex-syntax', { 'for': 'python' }
 Plug 'nathom/fast-python-indent', { 'for': 'python' }
 
+" Experiment with colorschemes using the SCROLL command
+" Plug 'vim-scripts/ScrollColors'
+" Plug 'flazz/vim-colorschemes'
+
+" tmux
+Plug 'christoomey/vim-tmux-navigator'
+
 call plug#end()
 
+" }}}
+
+let g:loaded_matchparen = 1
+" Colorscheme {{{
+autocmd vimenter * ++nested colorscheme gruvbox8
+set bg=dark
+" }}}
 
 let mapleader = ","
 let maplocalleader = "\\"
 
-autocmd vimenter * ++nested colorscheme gruvbox
+" Lua {{{
+lua << EOF
+
+require('lualine').setup({
+    options = {
+        section_separators = '',
+        component_separators = '|'
+    }
+})
 
 
-let g:airline#extensions#tabline#enabled = 1
+EOF
+" }}}
 
 " General {{{
 set encoding=UTF-8
@@ -37,16 +81,29 @@ if !has('nvim') && $TERM =~ 'xterm-256color'
   set noek
 endif
 
+" sets the cursor to thin instead of block in terminal
+if $TERM_PROGRAM =~ "iTerm"
+    let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+    let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+" elseif $TERM_PROGRAM =~ "tmux"
+"     let &t_SI = "\<Esc>[6 q"
+"     let &t_SR = "\<Esc>[4 q"
+"     let &t_EI = "\<Esc>[2 q"
+endif
+
+
 nnoremap <leader>w :w!<cr>
 nnoremap ; :
 
+" allow buffer switching without writing
+set hidden
+
 " sets true colors in terminal
 if exists('+termguicolors')
-  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
   set termguicolors
 endif
-
 " Line numbers
 set number
 
@@ -55,7 +112,10 @@ set number
 " Quickly edit vimrc
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 
-	nnoremap H ^
+" Open fuzzy finder
+nnoremap <leader>f :GFiles<cr>
+
+nnoremap H ^
 nnoremap L $
 onoremap H ^
 onoremap L $
@@ -63,21 +123,39 @@ vnoremap H ^
 vnoremap L $
 
 
+" Ignore case when searching
+set ignorecase
+
+" When searching try to be smart about cases
+set smartcase
+
+" Highlight search results
+set hlsearch
+
+" Makes search act like search in modern browsers
+set incsearch
 
 iabbrev adn and
 iabbrev typdef typedef
 
 " ALE {{{
+let g:ale_shell = '/bin/zsh'
 let g:ale_use_global_executables = 1
+let g:ale_rust_cargo_use_clippy = 1
 
+" rust: cargo
 let g:ale_linters = {
 \   'zsh': [],
-\   'python': ['flake8', 'mypy'],
-\   'rust': ['cargo'],
+\   'python': ["flake8", "mypy"],
+\   'rust': ["cargo"],
 \}
+" rust: rustfmt
 let g:ale_fixers = {
-\   'python': ['black'],
-\   'c': ['uncrustify'],
+\   'python': ["black"],
+\   'c': ["uncrustify"],
+\   'rust': ["rustfmt"],
+\   'java': ["google_java_format"],
+\   'lua': ["luafmt"]
 \}
 
 let g:ale_lint_on_text_changed = 'never'
@@ -98,6 +176,10 @@ inoremap <leader>m <esc>$a;<esc>o
 nnoremap <leader>M ma$a;<esc>`a
 inoremap <leader>M <esc>ma$a;<esc>`a
 
+" Autocomplete brackets
+imap a[ <Esc>$a {<cr>
+imap a] <Esc>o{<cr>
+
 
 " No annoying sound on errors
 set noerrorbells
@@ -117,6 +199,8 @@ set tabstop=4
 
 nnoremap <space> /
 
+nnoremap <esc> :noh<cr>
+
 " Splitting
 set splitbelow
 set splitright
@@ -126,10 +210,10 @@ nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
 " Properly disable sound on errors on MacVim
 
-augroup gui_settings
-    autocmd!
-    autocmd GUIEnter * set vb t_vb=
-augroup END
+" augroup gui_settings
+"     autocmd!
+"     autocmd GUIEnter * set vb t_vb=
+" augroup END
 
 set autochdir
 
@@ -152,3 +236,38 @@ inoremap <D-]> <esc>$a {<cr>}<esc>O
 
 " use dip, cip, etc to delete in parentheses
 onoremap ip i(
+
+augroup rust_filetype
+    autocmd!
+    au FileType rust setlocal foldmethod=indent
+    au FileType rust setlocal foldnestmax=2
+augroup END
+
+" Turn backup off, since most stuff is in SVN, git etc. anyway...
+set nobackup
+set nowb
+set noswapfile
+
+augroup vim_filetype
+    autocmd!
+    au FileType vim setlocal foldmethod=marker
+augroup END
+
+" Highlighting {{{
+let g:python_highlight_all = 1
+let g:ale_set_highlights = 0
+
+" Speed up syntax highlighting
+set nocursorcolumn
+set nocursorline
+set norelativenumber
+syntax sync minlines=256
+" }}}
+
+let g:delimitMate_expand_cr = 2
+
+
+" Mouse {{{
+set ttyfast
+set mouse=a
+" }}}
