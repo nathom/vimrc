@@ -1,35 +1,32 @@
 " Plugins {{{
 call plug#begin()
 
+" Fast gruvbox implementation
 Plug 'lifepillar/vim-gruvbox8'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
-Plug 'rktjmp/lush.nvim'
-" Plug 'npxbr/gruvbox.nvim'
-
 Plug 'dense-analysis/ale'
+
+Plug 'tmhedberg/SimpylFold'
 
 " Syntax highlighting
 Plug 'cespare/vim-toml'
 Plug 'vim-python/python-syntax'
-Plug 'arzg/vim-rust-syntax-ext'
+Plug 'https://github.com/bfrg/vim-cpp-modern'
+
+" Fuzzy finder
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+" Plug 'arzg/vim-rust-syntax-ext'
 
 Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-commentary'
-Plug 'Raimondi/delimitMate'
 
 Plug 'hoob3rt/lualine.nvim'
+Plug 'jghauser/mkdir.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
+Plug 'windwp/nvim-autopairs'
 
 Plug 'Konfekt/FastFold'
-'
-" Plug 'vim-airline/vim-airline'
-" Plug 'vim-airline/vim-airline-themes'
-
-" bindings
-Plug 'tpope/vim-unimpaired'
-" extend '.' functionality
-Plug 'tpope/vim-repeat'
 " Save previous yanks
 Plug 'maxbrunsfeld/vim-yankstack'
 " Surround text in characters
@@ -40,12 +37,10 @@ Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python'}
 Plug 'Galicarnax/vim-regex-syntax', { 'for': 'python' }
 Plug 'nathom/fast-python-indent', { 'for': 'python' }
 
-" Experiment with colorschemes using the SCROLL command
-" Plug 'vim-scripts/ScrollColors'
-" Plug 'flazz/vim-colorschemes'
-
+Plug 'norcalli/nvim-colorizer.lua'
 " tmux
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'dstein64/vim-startuptime'
 
 call plug#end()
 
@@ -57,10 +52,21 @@ autocmd vimenter * ++nested colorscheme gruvbox8
 set bg=dark
 " }}}
 
+let g:python_host_prog  = '/usr/bin/python2'
+let g:python3_host_prog = '/users/nathan/.pyenv/shims/python3'
+
 let mapleader = ","
 let maplocalleader = "\\"
 
+" sets true colors in terminal
+if exists('+termguicolors')
+  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 " Lua {{{
+if has('nvim')
 lua << EOF
 
 require('lualine').setup({
@@ -70,8 +76,10 @@ require('lualine').setup({
     }
 })
 
+require('nvim-autopairs').setup()
 
 EOF
+endif
 " }}}
 
 " General {{{
@@ -85,35 +93,68 @@ endif
 if $TERM_PROGRAM =~ "iTerm"
     let &t_SI = "\<Esc>]50;CursorShape=1\x7"
     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
-" elseif $TERM_PROGRAM =~ "tmux"
-"     let &t_SI = "\<Esc>[6 q"
-"     let &t_SR = "\<Esc>[4 q"
-"     let &t_EI = "\<Esc>[2 q"
 endif
 
 
 nnoremap <leader>w :w!<cr>
 nnoremap ; :
 
+" vim-unimpaired mappings
+nnoremap [b :bp<cr>
+nnoremap ]b :bn<cr>
+nnoremap <silent> [<space> maO<Esc>`a
+nnoremap <silent> ]<space> mao<Esc>`a
+
+
 " allow buffer switching without writing
 set hidden
-
-" sets true colors in terminal
-if exists('+termguicolors')
-  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
-  set termguicolors
-endif
 " Line numbers
 set number
 
 " }}}
 
 " Quickly edit vimrc
-nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>ev :vsplit ~/.vimrc<cr>
 
-" Open fuzzy finder
-nnoremap <leader>f :GFiles<cr>
+" fzf config
+
+let g:is_in_repo = system("fd -H --max-depth 1 '^.git$'") !=# ""
+if g:is_in_repo
+    nnoremap <C-p> :GFiles<cr>
+else
+    nnoremap <C-p> :Files<cr>
+endif
+
+vnoremap <leader>f "ay:call RgSelection(@a)<cr>
+
+function RgSelection(query)
+    execute "normal! :Rg " . a:query . "\<cr>"
+endfunction
+
+nnoremap <leader>f :call ToggleFoldlevel()<cr>
+
+function ToggleFoldlevel()
+    if &foldlevel < 99
+        set foldlevel=99
+    else
+        set foldlevel=0
+    endif
+endfunction
+
+" let g:fzf_action = {
+"   \ 'ctrl-t': 'tab split',
+"   \ 'ctrl-i': 'split',
+"   \ 'ctrl-s': 'vsplit' }
+" let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
+
+" let g:rg_command = '
+"   \ rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --color "always"
+"   \ -g "*.{tf,yml,yaml,vim,viml,tsx,ts,js,jsx,json,php,md,styl,pug,jade,html,config,py,cpp,c,go,hs,rb,conf,graphql,gql,sql}"
+"   \ -g "!{.config,.git,node_modules,vendor,yarn.lock,*.sty,*.bst,build,dist}/*" '
+
+" command! -bang -nargs=* F call fzf#vim#grep(g:rg_command . shellescape(<q-args>), 1, <bang>0)
+" command! -bang -nargs=* FU call fzf#vim#grep(g:rg_command . '-m1 ' . shellescape(<q-args>), 1, <bang>0)
+
 
 nnoremap H ^
 nnoremap L $
@@ -139,6 +180,8 @@ iabbrev adn and
 iabbrev typdef typedef
 
 " ALE {{{
+nnoremap <leader>n :ALENext<cr>
+nnoremap <leader>N :ALEPrevious<cr>
 let g:ale_shell = '/bin/zsh'
 let g:ale_use_global_executables = 1
 let g:ale_rust_cargo_use_clippy = 1
@@ -152,18 +195,21 @@ let g:ale_linters = {
 " rust: rustfmt
 let g:ale_fixers = {
 \   'python': ["black"],
-\   'c': ["uncrustify"],
+\   'c': ["clang-format"],
 \   'rust': ["rustfmt"],
 \   'java': ["google_java_format"],
 \   'lua': ["luafmt"]
 \}
+
+
 
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_set_highlights = 0  " annoying
 
 let g:ale_fix_on_save = 1
 " does not verify AST after fixing
-let g:ale_python_black_options = "--fast --line-length 79"
+let g:ale_python_black_options = "--fast"
+let g:ale_c_clangformat_options = "--style=file"
 
 " use quickfix list
 let g:ale_set_quickfix = 1
@@ -171,15 +217,29 @@ let g:ale_set_loclist = 0
 " }}}
 
 " Autocomplete semicolons
-nnoremap <leader>m $a;<esc>o
-inoremap <leader>m <esc>$a;<esc>o
-nnoremap <leader>M ma$a;<esc>`a
-inoremap <leader>M <esc>ma$a;<esc>`a
+nnoremap c; A;<esc>o
+inoremap c; <esc>A;<esc>o
+nnoremap C; maA;<esc>`a
+inoremap C; <esc>maA;<esc>`a
+nnoremap c: A:<esc>o
+inoremap c: <esc>A:<esc>o
+inoremap c- <esc>A<space>-><space>
+nnoremap c- A<space>-><space>
 
-" Autocomplete brackets
-imap a[ <Esc>$a {<cr>
-imap a] <Esc>o{<cr>
 
+" Autocomplete brackets, parens, quotes
+" inoremap [ []<Left>
+" inoremap { {}<Left>
+" inoremap ( ()<Left>
+" inoremap ' ''<Left>
+" inoremap " ""<Left>
+
+" Complete closure brackets
+inoremap c[ <Esc>$a {<cr>}<Esc>O
+inoremap c] <Esc>o{<cr>}<Esc>O
+
+nnoremap c[ <Esc>$a {<cr>}<Esc>O
+nnoremap c] <Esc>o{<cr>}<Esc>O
 
 " No annoying sound on errors
 set noerrorbells
@@ -190,7 +250,6 @@ set tm=500
 " Use spaces instead of tabs
 set expandtab
 
-" Be smart when using tabs ;)
 set smarttab
 
 " 1 tab == 4 spaces
@@ -201,13 +260,15 @@ nnoremap <space> /
 
 nnoremap <esc> :noh<cr>
 
-" Splitting
+" Splitting {{{
 set splitbelow
 set splitright
+" }}}
 
 let g:yankstack_map_keys = 0
 nmap <leader>p <Plug>yankstack_substitute_older_paste
 nmap <leader>P <Plug>yankstack_substitute_newer_paste
+
 " Properly disable sound on errors on MacVim
 
 " augroup gui_settings
@@ -215,7 +276,11 @@ nmap <leader>P <Plug>yankstack_substitute_newer_paste
 "     autocmd GUIEnter * set vb t_vb=
 " augroup END
 
-set autochdir
+" Change dir to directory of current buffer
+" set autochdir
+
+" dont redraw while executing macro
+set lazyredraw
 
 
 " insert parens/brackets/quotes around visual mode selection
@@ -239,9 +304,9 @@ onoremap ip i(
 
 augroup rust_filetype
     autocmd!
-    au FileType rust setlocal foldmethod=indent
-    au FileType rust setlocal foldnestmax=2
 augroup END
+
+set foldnestmax=2
 
 " Turn backup off, since most stuff is in SVN, git etc. anyway...
 set nobackup
@@ -250,24 +315,38 @@ set noswapfile
 
 augroup vim_filetype
     autocmd!
-    au FileType vim setlocal foldmethod=marker
+    " au FileType vim setlocal foldmethod=marker
 augroup END
 
 " Highlighting {{{
+let g:python_highlight_space_errors = 0
+let g:python_highlight_indent_errors = 0
 let g:python_highlight_all = 1
-let g:ale_set_highlights = 0
 
 " Speed up syntax highlighting
-set nocursorcolumn
 set nocursorline
-set norelativenumber
-syntax sync minlines=256
 " }}}
 
 let g:delimitMate_expand_cr = 2
 
+nmap <silent> <C-_> <Plug>(pydocstring)
+
+augroup filetype_python
+    autocmd!
+    au FileType python imap <leader>f f""
+augroup END
+
 
 " Mouse {{{
-set ttyfast
 set mouse=a
 " }}}
+
+set relativenumber
+
+let g:fastfold_fold_command_suffixes = []
+" let g:fastfold_savehook = 1
+let g:rust_fold = 1
+let g:python_fold = 1
+
+set autoread
+
